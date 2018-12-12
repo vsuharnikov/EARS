@@ -117,7 +117,7 @@ if __name__ == '__main__':
                                               hop_length=CHUNK_SIZE, n_mels=MEL_BANDS)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # Ignore log10 zero division
-            spec = librosa.core.perceptual_weighting(spec, MEL_FREQS, amin=1e-5, ref_power=1e-5,
+            spec = librosa.core.perceptual_weighting(spec, MEL_FREQS, amin=1e-5, ref=1e-5,
                                                      top_db=None)
 
         spec = np.clip(spec, 0, 100)

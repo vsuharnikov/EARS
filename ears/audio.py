@@ -119,7 +119,7 @@ def start():
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')  # Ignore log10 zero division
                 new_spec = librosa.core.perceptual_weighting(new_spec, MEL_FREQS, amin=1e-5,
-                                                             ref_power=1e-5, top_db=None)
+                                                             ref=1e-5, top_db=None)
             new_spec = np.clip(new_spec, 0, 100)
             n_chunks = np.shape(new_spec)[1]
             spectrogram[:, :-n_chunks] = spectrogram[:, n_chunks:]
