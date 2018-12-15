@@ -71,12 +71,12 @@ def start():
     import keras
     keras.backend.set_image_dim_ordering('th')
 
-    with open('ears/model.json', 'r') as file:
-        cfg = file.read()
-        model = keras.models.model_from_json(cfg)
-
-    model.load_weights('ears/model.h5')
-    logger.debug('Loaded Keras model with weights.')
+    # with open('ears/model.json', 'r') as file:
+    #     cfg = file.read()
+    #     model = keras.models.model_from_json(cfg)
+    #
+    # model.load_weights('ears/model.h5')
+    # logger.debug('Loaded Keras model with weights.')
 
     # Start audio capture
     sd.default.device = AUDIO_DEVICE
@@ -108,9 +108,9 @@ def start():
 
             # Populate audio signal
             step_audio = processing_queue.pop()
-            n_samples = len(step_audio)
-            signal[:-n_samples] = signal[n_samples:]
-            signal[-n_samples:] = step_audio[:]
+            n_samples = len(step_audio) # <-- len ?
+            signal[:-n_samples] = signal[n_samples:] # ?
+            signal[-n_samples:] = step_audio[:] # ?
 
             # Populate spectrogram
             new_spec = librosa.feature.melspectrogram(np.concatenate([last_chunk, step_audio])[:, 0],
@@ -118,22 +118,23 @@ def start():
                                                       hop_length=CHUNK_SIZE, n_mels=MEL_BANDS)
             with warnings.catch_warnings():
                 warnings.simplefilter('ignore')  # Ignore log10 zero division
+                # <-- ?
                 new_spec = librosa.core.perceptual_weighting(new_spec, MEL_FREQS, amin=1e-5,
                                                              ref=1e-5, top_db=None)
-            new_spec = np.clip(new_spec, 0, 100)
+            new_spec = np.clip(new_spec, 0, 100) # values in new_spec E [0; 100]
             n_chunks = np.shape(new_spec)[1]
             spectrogram[:, :-n_chunks] = spectrogram[:, n_chunks:]
             spectrogram[:, -n_chunks:] = new_spec
 
             # Classify incoming audio
-            predictions[:, :-1] = predictions[:, 1:]
-            offset = SEGMENT_LENGTH // 2
-            pred = classify([
-                np.stack([spectrogram[:, -(SEGMENT_LENGTH + offset):-offset]]),
-                np.stack([spectrogram[:, -SEGMENT_LENGTH:]]),
-            ])
-            predictions[:, -1] = pred
-            target = labels[np.argmax(pred)]
+            # predictions[:, :-1] = predictions[:, 1:]
+            # offset = SEGMENT_LENGTH // 2
+            # pred = classify([
+            #     np.stack([spectrogram[:, -(SEGMENT_LENGTH + offset):-offset]]),
+            #     np.stack([spectrogram[:, -SEGMENT_LENGTH:]]),
+            # ])
+            # predictions[:, -1] = pred
+            target = labels[0] #np.argmax(pred)]
 
             # Clean up
             last_chunk[:] = step_audio[-CHUNK_SIZE:]

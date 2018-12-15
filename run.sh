@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bokeh serve --allow-websocket-origin=10.3.14.15:5006 ears
+bokeh serve --allow-websocket-origin=127.0.0.1:5006 ears
